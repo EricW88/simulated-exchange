@@ -13,6 +13,8 @@
 #include <sys/time.h> // FD_SET, FD_ISSET, FD_ZERO macros 
 #include <string>
 #include <iostream>
+
+#include "Exchange.hpp"
      
 #define TRUE   1 
 #define FALSE  0 
@@ -84,12 +86,12 @@ int main(int argc , char *argv[])
          
     while(TRUE)  
     {
-        // clear the socket set 
+        // clear the socket set
         FD_ZERO(&readfds);  
-     
+    
         // add master socket to set 
         FD_SET(master_socket, &readfds);  
-        max_sd = master_socket;
+        max_sd = master_socket; 
              
         // add child sockets to set 
         for ( i = 0 ; i < max_clients ; i++)  
@@ -130,13 +132,6 @@ int main(int argc , char *argv[])
             printf("New connection , socket fd is %d , ip is : %s , port : %d \
                   \n" , new_socket , inet_ntoa(address.sin_addr) , ntohs
                   (address.sin_port));  
-            // send new connection greeting message 
-            if( send(new_socket, message, strlen(message), 0) != strlen(message))  
-            {  
-                perror("send");  
-            }  
-                 
-            puts("Welcome message sent successfully");  
                  
             // add new socket to array of sockets 
             for (i = 0; i < max_clients; i++)  
@@ -173,8 +168,8 @@ int main(int argc , char *argv[])
                     close( sd );  
                     client_socket[i] = 0;  
                 }  
-                     
-                // Echo back the message that came in 
+
+                // parse message
                 else 
                 {  
                     // set the string terminating NULL byte on the end 
