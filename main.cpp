@@ -12,6 +12,7 @@
 #include <netinet/in.h> 
 #include <sys/time.h> // FD_SET, FD_ISSET, FD_ZERO macros 
 #include <string>
+#include <iostream>
      
 #define TRUE   1 
 #define FALSE  0 
@@ -21,7 +22,7 @@
 int main(int argc , char *argv[])  
 {  
     int opt = TRUE;  
-    int master_socket , addrlen , new_socket , client_socket[30] , 
+    int master_socket , addrlen , new_socket , client_socket[FD_SETSIZE - 2] , 
           max_clients = FD_SETSIZE - 2 , activity, i , valread , sd;  
     int max_sd;  
     struct sockaddr_in address;  
@@ -82,13 +83,13 @@ int main(int argc , char *argv[])
     puts("Waiting for connections ...");  
          
     while(TRUE)  
-    {  
+    {
         // clear the socket set 
         FD_ZERO(&readfds);  
      
         // add master socket to set 
         FD_SET(master_socket, &readfds);  
-        max_sd = master_socket;  
+        max_sd = master_socket;
              
         // add child sockets to set 
         for ( i = 0 ; i < max_clients ; i++)  
@@ -101,17 +102,17 @@ int main(int argc , char *argv[])
                 FD_SET( sd , &readfds);  
                  
             // highest file descriptor number, need it for the select function 
-            if(sd > max_sd)  
-                max_sd = sd;  
+            if(sd > max_sd) {  
+                max_sd = sd; 
+            } 
         }  
      
         // wait for an activity on one of the sockets , timeout is NULL , 
         // so wait indefinitely 
-        activity = select( max_sd + 1 , &readfds , NULL , NULL , NULL);  
-       
-        if ((activity < 0) && (errno!=EINTR))  
+        activity = select(max_sd + 1 , &readfds , NULL , NULL , NULL);  
+        if ((activity < 0) && (errno != EINTR))  
         {  
-            printf("select error");  
+            printf("select error\n");  
         }  
              
         // If something happened on the master socket , 
@@ -129,7 +130,6 @@ int main(int argc , char *argv[])
             printf("New connection , socket fd is %d , ip is : %s , port : %d \
                   \n" , new_socket , inet_ntoa(address.sin_addr) , ntohs
                   (address.sin_port));  
-           
             // send new connection greeting message 
             if( send(new_socket, message, strlen(message), 0) != strlen(message))  
             {  
@@ -143,7 +143,7 @@ int main(int argc , char *argv[])
             {  
                 // if position is empty 
                 if( client_socket[i] == 0 )  
-                {  
+                {
                     client_socket[i] = new_socket;  
                     printf("Adding to list of sockets as %d\n" , i);  
                          
