@@ -7,8 +7,6 @@
 #include <errno.h> 
 #include <unistd.h>   // close 
 #include <arpa/inet.h>    // close 
-#include <sys/types.h> 
-#include <sys/socket.h> 
 #include <netinet/in.h> 
 #include <sys/time.h> // FD_SET, FD_ISSET, FD_ZERO macros 
 #include <string>
@@ -21,7 +19,7 @@
 #define PORT 8888 
 
 
-int main(int argc , char *argv[])  
+int main()  
 {  
     int opt = TRUE;  
     int master_socket , addrlen , new_socket , client_socket[FD_SETSIZE - 2] , 
@@ -32,10 +30,12 @@ int main(int argc , char *argv[])
     char buffer[1025];  // data buffer of 1K 
          
     // set of socket descriptors 
-    fd_set readfds;  
+    fd_set readfds;
+
+    Exchange ex;
          
     // a message 
-    char *message = "ECHO Daemon v1.0 \r\n";
+    // char *message = "ECHO Daemon v1.0 \r\n";
     // std::string message = "ECHO Daemon v1.0 \r\n";  
      
     // initialise all client_socket[] to 0 so not checked 
@@ -153,30 +153,29 @@ int main(int argc , char *argv[])
             sd = client_socket[i];  
                  
             if (FD_ISSET( sd , &readfds))  
-            {  
-                // Check if it was for closing , and also read the 
-                // incoming message 
-                if ((valread = read( sd , buffer, 1024)) == 0)  
-                {  
-                    // Somebody disconnected , get his details and print 
+            {
+                int numRead = read(sd, buffer, 1024);
+                if(numRead == 0) {
                     getpeername(sd , (struct sockaddr*)&address , \
-                        (socklen_t*)&addrlen);  
+                                            (socklen_t*)&addrlen);  
                     printf("Host disconnected , ip %s , port %d \n" , 
                           inet_ntoa(address.sin_addr) , ntohs(address.sin_port));  
                          
                     // Close the socket and mark as 0 in list for reuse 
-                    close( sd );  
-                    client_socket[i] = 0;  
+                    close( sd ); 
+                } else {
+                    buffer[numRead - 2] = '\0';
+                    ex.parse(buffer, sd);
                 }  
 
                 // parse message
-                else 
-                {  
-                    // set the string terminating NULL byte on the end 
-                    // of the data read 
-                    buffer[valread] = '\0';  
-                    send(sd , buffer , strlen(buffer) , 0 );  
-                }  
+                // else 
+                // {  
+                //     // set the string terminating NULL byte on the end 
+                //     // of the data read 
+                //     buffer[valread] = '\0';  
+                    // send(sd , buffer , strlen(buffer) , 0 );  
+                // }  
             }  
         }  
     }  

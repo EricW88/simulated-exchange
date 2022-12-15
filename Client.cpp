@@ -1,5 +1,9 @@
 #include "Client.hpp"
 
-std::string Client::viewClient() {
-    return "";
+void Client::viewPositions() {
+    return;
+}
+
+void Client::viewClient() {
+    return;
 }

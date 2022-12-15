@@ -3,18 +3,20 @@
 
 #include "Order.hpp"
 #include <vector>
+#include <map>
 
 using std::map;
 class Client {
 
 	private:
-        int id;
-        int fd;
+        // int id;
+        int sd;
         int balance;
         map<unsigned int, Order> positions;
 
     public:
-        std::string viewClient();
+        void viewPositions();
+        void viewClient();
 };
 
 #endif
