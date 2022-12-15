@@ -162,6 +162,7 @@ int main()
                           inet_ntoa(address.sin_addr) , ntohs(address.sin_port));  
                          
                     // Close the socket and mark as 0 in list for reuse 
+                    ex.close(sd);
                     close( sd ); 
                 } else {
                     buffer[numRead - 2] = '\0';

@@ -9,14 +9,20 @@ using std::map;
 class Client {
 
 	private:
-        // int id;
+        static constexpr double INIT_BALANCE = 10000;
+        std::string name;
+        bool open;
         int sd;
-        int balance;
+        double balance;
         map<unsigned int, Order> positions;
 
     public:
+        Client(std::string name, int sd);
+        bool isOpen();
+        void close();
+        void updateSd(int sd);
         void viewPositions();
-        void viewClient();
+        std::string viewClient();
 };
 
 #endif
