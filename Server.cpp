@@ -4,7 +4,7 @@
 #include <stdio.h> 
 #include <string.h>   // strlen 
 #include <stdlib.h> 
-#include <errno.h> 
+// #include <errno.h> 
 #include <unistd.h>   // close 
 #include <arpa/inet.h>    // close 
 #include <netinet/in.h> 
@@ -113,7 +113,8 @@ int main()
         // so wait indefinitely 
         activity = select(max_sd + 1 , &readfds , NULL , NULL , NULL);  
         if ((activity < 0) && (errno != EINTR))  
-        {  
+        {
+            // std::cout << "Error Code: " << errno << std::endl;  
             printf("select error\n");  
         }  
              
@@ -161,7 +162,6 @@ int main()
                     printf("Host disconnected , ip %s , port %d \n" , 
                           inet_ntoa(address.sin_addr) , ntohs(address.sin_port));  
                          
-                    // Close the socket and mark as 0 in list for reuse 
                     ex.close(sd);
                     close( sd ); 
                 } else {

@@ -16,23 +16,21 @@ void Exchange::cancelOrder(int sd, int orderId) {
 }
 
 void Exchange::addClient(int sd, std::string clientName) {
-    char *addMsg;
-    
-    if(clients.find(clientName) != clients.end() && clients.find(clientName)->second.isOpen()) {
-        std::cout << "test1" << std::endl;
-        addMsg = ERR_CLIENT_CONNECTED;
+    std::string strMsg;
+    if(sdMap.find(sd) != sdMap.end()) {
+        strMsg = std::string("\n") + MSG_REJECT + std::string(" ") + CMD_HELLO + ERR_SD_TAKEN;
+    } else if(clients.find(clientName) != clients.end() && clients.find(clientName)->second.isOpen()) {
+        strMsg = std::string("\n") + MSG_REJECT + std::string(" ") + CMD_HELLO + ERR_CLIENT_CONNECTED;
     } else {
-        std::cout << "test2" << std::endl;
         sdMap[sd] = clientName;
         if(clients.find(clientName) != clients.end()) {
             clients.find(clientName)->second.updateSd(sd);
         } else {
             clients.insert(make_pair(clientName, Client(clientName, sd)));
         }
-        std::string strMsg = "HELLO " + clients.find(clientName)->second.viewClient() + "\n";
-        addMsg = &strMsg[0];
+        strMsg = std::string("\n") + CMD_HELLO + std::string(" ") + clients.find(clientName)->second.viewClient() + "\n";
     }
-
+    char *addMsg = &strMsg[0];
     send(sd, addMsg, strlen(addMsg), 0);
     return;
 }
@@ -45,10 +43,10 @@ void Exchange::parse(void *buffer, int sd) {
     const char *errMessage = ERR_INPUT;
 
     bool invalidInput = true;
-    if(cur == "HELLO") {
+    if(cur == CMD_HELLO) {
         invalidInput = !std::getline(input, cur, ' ') || std::getline(input, cur, ' ');
         if(!invalidInput) addClient(sd, cur);
-    } else if(cur == "BUY" || cur == "SELL") {
+    } else if(cur == CMD_BUY || cur == CMD_SELL) {
         int price;
         int size;
         if(std::getline(input, cur, ' ')) {
@@ -60,14 +58,14 @@ void Exchange::parse(void *buffer, int sd) {
                 invalidInput = idx != cur.length() || std::getline(input, cur, ' ');
             }
         }
-        if(!invalidInput) addOrder(sd, cur == "BUY", price, size);
-    } else if(cur == "VIEW") {
+        if(!invalidInput) addOrder(sd, cur == CMD_BUY, price, size);
+    } else if(cur == CMD_VIEW) {
         invalidInput = std::getline(input, cur, ' ') ? true : false;
         if(!invalidInput) { 
             Client c = clients.find(sdMap[sd])->second;
             c.viewPositions();
         }
-    } else if(cur == "BOOK") {
+    } else if(cur == CMD_BOOK) {
         int size;
         if(std::getline(input, cur, ' ')) {
             size_t idx;
@@ -75,7 +73,7 @@ void Exchange::parse(void *buffer, int sd) {
             invalidInput = idx != cur.length() || std::getline(input, cur, ' ');
         }
         if(!invalidInput) viewExchange(sd, size);
-    } else if(cur == "CANCEL") {
+    } else if(cur == CMD_CANCEL) {
         int id;
         if(std::getline(input, cur, ' ')) {
             size_t idx;
@@ -92,7 +90,7 @@ void Exchange::parse(void *buffer, int sd) {
 }
 
 void Exchange::close(int sd) {
+    if(sdMap.find(sd) == sdMap.end()) return;
     clients.find(sdMap[sd])->second.close();
     sdMap.erase(sd);
-    return;
 }

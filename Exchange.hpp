@@ -6,6 +6,8 @@
 #include <sys/types.h>      // senc
 #include <sys/socket.h>
 #include <cassert> 
+#include <errno.h> 
+
 
 #include "Level.hpp"
 #include "Client.hpp"
@@ -18,8 +20,11 @@
 #define CMD_BOOK "BOOK"
 #define CMD_CANCEL "CANCEL"
 
-#define ERR_INPUT "Invalid input\n"
-#define ERR_CLIENT_CONNECTED "REJECT HELLO\nReason: Client already connected\n\n"
+#define MSG_REJECT "REJECT"
+
+#define ERR_INPUT "\nInvalid input\n"
+#define ERR_SD_TAKEN "\nReason: Already connected to exchange\n"
+#define ERR_CLIENT_CONNECTED "\nReason: Client is already connected\n"
 
 
 using std::unordered_map;
