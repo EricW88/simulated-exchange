@@ -23,7 +23,7 @@ int main()
 {  
     int opt = TRUE;  
     int master_socket , addrlen , new_socket , client_socket[FD_SETSIZE - 2] , 
-          max_clients = FD_SETSIZE - 2 , activity, i , valread , sd;  
+          max_clients = FD_SETSIZE - 2 , activity, i , sd;  
     int max_sd;  
     struct sockaddr_in address;  
          
@@ -167,16 +167,7 @@ int main()
                 } else {
                     buffer[numRead - 2] = '\0';
                     ex.parse(buffer, sd);
-                }  
-
-                // parse message
-                // else 
-                // {  
-                //     // set the string terminating NULL byte on the end 
-                //     // of the data read 
-                //     buffer[valread] = '\0';  
-                    // send(sd , buffer , strlen(buffer) , 0 );  
-                // }  
+                }
             }  
         }  
     }  

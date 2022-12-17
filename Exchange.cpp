@@ -101,12 +101,6 @@ void Exchange::parse(void *buffer, int sd) {
             c.viewPositions();
         }
     } else if(cur == CMD_BOOK) {
-        // int size;
-        // if(std::getline(input, cur, ' ')) {
-        //     size_t idx;
-        //     size = stoi(cur, &idx);
-        //     invalidInput = idx != cur.length() || std::getline(input, cur, ' ');
-        // }
         invalidInput = std::getline(input, cur, ' ') ? true : false;
         if(!invalidInput) viewExchange(sd);
     } else if(cur == CMD_CANCEL) {
