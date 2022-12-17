@@ -20,6 +20,8 @@ void Client::viewPositions() {
 }
 
 std::string Client::viewClient() {
+    std::string balance_str = std::to_string(balance);
+    balance_str.erase(balance_str.length() - 4);
     std::string result = name + "\nBALANCE: " + std::to_string(balance) + "\nPOSITIONS: ";
     for(auto it = positions.begin(); it != positions.end(); ++it) {
         result += it->second.viewOrder() + ", ";

@@ -1,7 +1,42 @@
 #include "Exchange.hpp"
 
-void Exchange::viewExchange(int sd, int size) {
-    send(sd, "viewExchange\n\n", strlen("viewExchange\n\n"), 0);
+void Exchange::viewExchange(int sd) {
+    bids.insert(std::make_pair(1.9, Level(1.9)));
+    asks.insert(std::make_pair(2.1, Level(2.1)));
+
+
+    if(bids.empty() || asks.empty()) {
+        send(sd, MSG_BOOK_EMPTY, strlen(MSG_BOOK_EMPTY), 0);
+        return;
+    }
+
+    double mid = (bids.rbegin()->first + asks.begin()->first) / 2.0;
+    double upper = mid * (1 + SNAPSHOT_CUTOFF);
+    double lower = mid * (1 - SNAPSHOT_CUTOFF);
+    std::string strMsg = "\nASKS:\n";
+
+    // concatenate asks in descending order
+    auto askIt = asks.begin();
+    while(askIt != asks.end() && askIt->first <= upper) {
+        ++askIt;
+    }
+    --askIt;
+    for(; askIt != asks.begin(); --askIt) {
+        strMsg += askIt->second.viewLevel();
+    }
+    if(askIt->first <= upper) strMsg += askIt->second.viewLevel();
+    strMsg += "\nBIDS:\n";
+
+    // concatenate bids in increasing order
+    auto bidIt = bids.rbegin();
+    while(bidIt != bids.rend() && bidIt->first >= lower) {
+        strMsg += bidIt->second.viewLevel();
+        ++bidIt;
+    }
+    strMsg += "\n";
+
+    char *viewMsg = &strMsg[0];
+    send(sd, viewMsg, strlen(viewMsg), 0);
     return;
 }
 
@@ -66,13 +101,14 @@ void Exchange::parse(void *buffer, int sd) {
             c.viewPositions();
         }
     } else if(cur == CMD_BOOK) {
-        int size;
-        if(std::getline(input, cur, ' ')) {
-            size_t idx;
-            size = stoi(cur, &idx);
-            invalidInput = idx != cur.length() || std::getline(input, cur, ' ');
-        }
-        if(!invalidInput) viewExchange(sd, size);
+        // int size;
+        // if(std::getline(input, cur, ' ')) {
+        //     size_t idx;
+        //     size = stoi(cur, &idx);
+        //     invalidInput = idx != cur.length() || std::getline(input, cur, ' ');
+        // }
+        invalidInput = std::getline(input, cur, ' ') ? true : false;
+        if(!invalidInput) viewExchange(sd);
     } else if(cur == CMD_CANCEL) {
         int id;
         if(std::getline(input, cur, ' ')) {

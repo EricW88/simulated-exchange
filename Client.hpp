@@ -9,7 +9,7 @@ using std::map;
 class Client {
 
 	private:
-        static constexpr double INIT_BALANCE = 10000;
+        static constexpr double INIT_BALANCE = 100000;
         std::string name;
         bool open;
         int sd;

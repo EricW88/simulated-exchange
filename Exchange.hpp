@@ -9,6 +9,7 @@
 #include <errno.h> 
 
 
+
 #include "Level.hpp"
 #include "Client.hpp"
 #include "Order.hpp"
@@ -21,8 +22,10 @@
 #define CMD_CANCEL "CANCEL"
 
 #define MSG_REJECT "REJECT"
+#define MSG_BOOK_EMPTY "\nOrderbook is empty\n"
 
 #define ERR_INPUT "\nInvalid input\n"
+#define ERR_NOT_CONNECTED "\nNot connected to exchange\n"
 #define ERR_SD_TAKEN "\nReason: Already connected to exchange\n"
 #define ERR_CLIENT_CONNECTED "\nReason: Client is already connected\n"
 
@@ -32,6 +35,7 @@ using std::unordered_set;
 class Exchange {
 	private:
         // const static char* ERR_INVALID_CMD;
+        static constexpr double SNAPSHOT_CUTOFF = .2;
 
 		map<double, Level> bids;
 		map<double, Level> asks;
@@ -40,7 +44,7 @@ class Exchange {
 		map<unsigned int, Order *> orders;
 		int orderId;
 
-        void viewExchange(int sd, int size);
+        void viewExchange(int sd);
 		void addOrder(int sd, bool isBuy, int price, int size);
 		void cancelOrder(int sd, int orderId);
 		void addClient(int sd, std::string clientId);
